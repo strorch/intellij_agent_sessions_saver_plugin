@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "projectScopeId": "project-a",
+  "snapshots": [
+    {
+      "snapshotId": "snap-2",
+      "schemaVersion": 2,
+      "projectScopeId": "project-a",
+      "terminalTabId": "tab-2",
+      "terminalDisplayName": "Terminal 2",
+      "agentType": "claude",
+      "sessionReference": "session-def",
+      "hadActiveAgentSession": true,
+      "capturedAt": 2,
+      "lastKnownStatus": "ready"
+    }
+  ]
+}
