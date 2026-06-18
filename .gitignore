@@ -7,6 +7,8 @@ out/
 *.iml
 *.class
 *.jar
+# Keep the Gradle wrapper jar tracked so a fresh checkout can bootstrap Gradle.
+!gradle/wrapper/gradle-wrapper.jar
 
 # Logs and environment
 *.log
