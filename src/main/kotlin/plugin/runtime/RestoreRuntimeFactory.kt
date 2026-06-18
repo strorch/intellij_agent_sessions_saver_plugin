@@ -391,6 +391,10 @@ object RestoreRuntimeFactory {
         }
     }
 
+    fun evict(project: Project) {
+        runtimes.remove(project.locationHash)
+    }
+
     fun notify(project: Project, title: String, content: String, type: NotificationType) {
         val app = ApplicationManager.getApplication()
         if (app.isHeadlessEnvironment || app.isUnitTestMode || project.isDisposed) {
