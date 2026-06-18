@@ -48,8 +48,13 @@ class RestoreCoordinator(
             }
         val finalStatuses = results.groupBy { it.terminalTabId }
             .map { (_, attempts) -> attempts.last().status }
+        // SKIPPED is an intentional, non-failure outcome (issue #11) and is excluded here.
+        // UNSUPPORTED means the terminal could not be restored (e.g. unknown/unregistered agent),
+        // so it must count as a failure to prevent reporting a clean-success run (PR #21 review).
         val failures = finalStatuses.count {
-            it == AgentResumeStatus.FAILED.name || it == AgentResumeStatus.TIMEOUT.name
+            it == AgentResumeStatus.FAILED.name ||
+                it == AgentResumeStatus.TIMEOUT.name ||
+                it == AgentResumeStatus.UNSUPPORTED.name
         }
         notifier.publish(results)
         telemetryLogger.log(RestoreTelemetryEvent("restore.summary", projectScopeId, status = if (failures == 0) "success" else "partial"))
