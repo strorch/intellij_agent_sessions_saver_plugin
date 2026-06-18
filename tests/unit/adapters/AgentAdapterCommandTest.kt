@@ -38,7 +38,27 @@ class AgentAdapterCommandTest {
         val result = adapter.resume(request(sessionReference = "oc-9") { command -> dispatched = command; true })
 
         assertEquals(AgentResumeStatus.SUCCESS, result.status)
-        assertEquals("opencode --session oc-9", dispatched)
+        assertEquals("opencode --session 'oc-9'", dispatched)
+    }
+
+    @Test
+    fun `opencode adapter quotes malicious session reference`() {
+        var dispatched = ""
+        val adapter = OpenCodeAgentAdapter()
+        val result = adapter.resume(request(sessionReference = "x; rm -rf /") { command -> dispatched = command; true })
+
+        assertEquals(AgentResumeStatus.SUCCESS, result.status)
+        assertEquals("opencode --session 'x; rm -rf /'", dispatched)
+    }
+
+    @Test
+    fun `opencode adapter escapes embedded single quote`() {
+        var dispatched = ""
+        val adapter = OpenCodeAgentAdapter()
+        val result = adapter.resume(request(sessionReference = "a'b") { command -> dispatched = command; true })
+
+        assertEquals(AgentResumeStatus.SUCCESS, result.status)
+        assertEquals("opencode --session 'a'\\''b'", dispatched)
     }
 
     @Test
