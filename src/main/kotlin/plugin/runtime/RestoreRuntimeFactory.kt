@@ -3,6 +3,7 @@ package plugin.runtime
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import org.jetbrains.plugins.terminal.ShellTerminalWidget
@@ -143,7 +144,10 @@ data class RestoreRuntime(
             summaryNotifier.publish(emptyList(), emptySummary.toCounters())
             return emptySummary
         }
-        val commandExecutors = resolveTerminalCommandExecutors(dispatchQueue)
+        // Terminal widget enumeration/creation touches IntelliJ widget APIs that require the EDT.
+        // dispatchRestore itself may run on a background thread (see callers, which run restore off
+        // the EDT so the per-attempt timeout never blocks the EDT), so marshal this back to the EDT.
+        val commandExecutors = runOnEdt { resolveTerminalCommandExecutors(dispatchQueue) }
         val results = restoreCoordinator.restore(
             projectScopeId,
             dispatchQueue,
@@ -179,7 +183,9 @@ data class RestoreRuntime(
                 candidates = snapshot.sessionCandidates.distinct(),
             )
         }
-        val choices = startupChooser.choose(project, requests)
+        // The chooser shows a modal dialog and must run on the EDT even when dispatchRestore is
+        // invoked from a background thread.
+        val choices = runOnEdt { startupChooser.choose(project, requests) }
         return ambiguous.map { snapshot ->
             val selection = choices[snapshot.terminalTabId]
             val selectedReference = selection?.selectedSessionReference?.trim().orEmpty()
@@ -266,6 +272,17 @@ data class RestoreRuntime(
         }
     }
 
+    private fun <T> runOnEdt(block: () -> T): T {
+        val app = ApplicationManager.getApplication()
+        if (app.isDispatchThread) {
+            return block()
+        }
+        var result: T? = null
+        app.invokeAndWait({ result = block() }, ModalityState.nonModal())
+        @Suppress("UNCHECKED_CAST")
+        return result as T
+    }
+
     private fun resolveTerminalCommandExecutors(
         snapshots: List<TerminalSessionSnapshot>,
     ): Map<String, (String) -> Boolean> {
@@ -335,7 +352,7 @@ object RestoreRuntimeFactory {
             )
             val coordinator = RestoreCoordinator(
                 adapterRegistry = registry,
-                attemptRunner = RestoreAttemptRunner(),
+                attemptRunner = RestoreAttemptRunner(EdtTerminalDispatchMarshaller()),
                 retryPolicyEngine = RetryPolicyEngine(),
                 notifier = summaryNotifier,
                 telemetryLogger = telemetry,
