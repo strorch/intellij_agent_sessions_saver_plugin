@@ -63,10 +63,10 @@ class MixedAgentMappingTest {
         val results = coordinator.restore("project-a", snapshots, timeoutSeconds = 30, terminalCommandExecutors = executors)
 
         assertTrue(results.all { it.status == "SUCCESS" })
-        assertEquals("codex resume cx-123", commands["tab-codex-exact"])
+        assertEquals("codex resume 'cx-123'", commands["tab-codex-exact"])
         assertEquals("claude --continue", commands["tab-claude-fallback"])
         assertEquals("opencode --continue", commands["tab-opencode-fallback"])
-        assertEquals("copilot --resume=cp-999", commands["tab-copilot-exact"])
+        assertEquals("copilot --resume='cp-999'", commands["tab-copilot-exact"])
     }
 
     private fun snapshot(tabId: String, agent: String, sessionReference: String?): TerminalSessionSnapshot {

@@ -48,7 +48,7 @@ class StartupRestoreAmbiguityChooserTest {
             terminalCommandExecutors = mapOf("t1" to { command: String -> dispatched = command; true }),
         )
 
-        assertEquals("codex resume chosen-777", dispatched)
+        assertEquals("codex resume 'chosen-777'", dispatched)
         assertTrue(results.last().status == "SUCCESS")
     }
 }
