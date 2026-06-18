@@ -18,7 +18,8 @@ class RetryPolicyEngine(
     ): List<RestoreAttemptResult> {
         val restoreRunId = UUID.randomUUID().toString()
         val first = attemptRunner.runAttempt(restoreRunId, snapshot, adapter, timeoutSeconds, 1, commandExecutor)
-        if (first.status == AgentResumeStatus.SUCCESS.name || maxAttempts <= 1) {
+        val retryableStatuses = setOf(AgentResumeStatus.FAILED.name, AgentResumeStatus.TIMEOUT.name)
+        if (first.status !in retryableStatuses || maxAttempts <= 1) {
             return listOf(first)
         }
         val second = attemptRunner.runAttempt(restoreRunId, snapshot, adapter, timeoutSeconds, 2, commandExecutor)
