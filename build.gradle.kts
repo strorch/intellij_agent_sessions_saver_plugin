@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import java.io.File
 
 plugins {
@@ -42,6 +43,16 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = providers.gradleProperty("ideaSinceBuild")
             untilBuild = providers.gradleProperty("ideaUntilBuild")
+        }
+    }
+
+    // Validate the advertised compatibility range (since-build 243 .. until-build 252.*)
+    // with the IntelliJ Plugin Verifier so the metadata bounds are actually tested,
+    // not just asserted. The terminal integration is only supported across these IDEs.
+    pluginVerification {
+        ides {
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.3")
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2025.2")
         }
     }
 }
