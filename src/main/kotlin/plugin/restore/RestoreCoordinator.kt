@@ -46,7 +46,11 @@ class RestoreCoordinator(
                     ),
                 )
             }
-        val failures = results.count { it.status != AgentResumeStatus.SUCCESS.name }
+        val finalStatuses = results.groupBy { it.terminalTabId }
+            .map { (_, attempts) -> attempts.last().status }
+        val failures = finalStatuses.count {
+            it == AgentResumeStatus.FAILED.name || it == AgentResumeStatus.TIMEOUT.name
+        }
         notifier.publish(results)
         telemetryLogger.log(RestoreTelemetryEvent("restore.summary", projectScopeId, status = if (failures == 0) "success" else "partial"))
         telemetryLogger.log(RestoreTelemetryEvent("restore.end", projectScopeId, details = "results=${results.size}"))
