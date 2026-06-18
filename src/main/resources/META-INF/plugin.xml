@@ -7,7 +7,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.plugins.terminal</depends>
 
-    <idea-version since-build="243" until-build="243.*"/>
+    <idea-version since-build="243"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="plugin.restore.StartupRestorePostStartupActivity"/>

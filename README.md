@@ -16,7 +16,7 @@ Agent Sessions Saver restores context fast by:
 
 ## What It Supports
 
-- IntelliJ IDEA 2024.3 (`since-build=243`, `until-build=243.*`)
+- IntelliJ IDEA 2024.3+ (`since-build=243`, open-ended upper bound)
 - Terminal tool window integration
 - Providers:
   - Codex
