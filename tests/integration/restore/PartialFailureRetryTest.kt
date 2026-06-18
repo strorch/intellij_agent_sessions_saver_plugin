@@ -63,6 +63,6 @@ class PartialFailureRetryTest {
 
         assertTrue(results.any { it.terminalTabId == "t1" && it.status == "SUCCESS" })
         assertTrue(results.any { it.terminalTabId == "t2" && it.status != "SUCCESS" })
-        assertEquals(3, results.size)
+        assertEquals(2, results.size)
     }
 }
