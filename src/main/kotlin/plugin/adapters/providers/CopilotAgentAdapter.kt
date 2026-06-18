@@ -32,6 +32,6 @@ class CopilotAgentAdapter : AgentAdapter {
     }
 
     private fun escapeArgument(value: String): String {
-        return value.replace("\"", "\\\"")
+        return "'" + value.replace("'", "'\\''") + "'"
     }
 }

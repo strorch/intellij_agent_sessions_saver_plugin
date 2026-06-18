@@ -32,6 +32,6 @@ class CodexAgentAdapter : AgentAdapter {
     }
 
     private fun escapeArgument(value: String): String {
-        return value.replace("\"", "\\\"")
+        return "'" + value.replace("'", "'\\''") + "'"
     }
 }
