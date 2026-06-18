@@ -327,7 +327,7 @@ object RestoreRuntimeFactory {
                 migrationService = SnapshotMigrationService(),
                 baseDir = storageDir,
             )
-            val settingsService = RestorePolicySettingsService()
+            val settingsService = RestorePolicySettingsService.getInstance()
             val summaryNotifier = RestoreSummaryNotifier()
             val telemetry = RestoreTelemetryLogger()
             val registry = AgentAdapterRegistry(
