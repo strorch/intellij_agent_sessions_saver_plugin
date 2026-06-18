@@ -298,12 +298,19 @@ data class RestoreRuntime(
         }.toMutableList()
         val executors = mutableMapOf<String, (String) -> Boolean>()
         snapshots.forEach { snapshot ->
-            val indexByTitle = available.indexOfFirst { it.title == snapshot.terminalDisplayName }
-            val selectedIndex = if (indexByTitle >= 0) indexByTitle else 0
-            if (available.isNotEmpty()) {
-                val target = available.removeAt(selectedIndex)
+            // Require an unambiguous title match against a live terminal. Titles are neither
+            // unique nor stable, so a non-unique or absent match must NOT be dispatched to an
+            // arbitrary (e.g. index-0) terminal, which could swap an unrelated context (#4).
+            val matches = available.filter { it.title == snapshot.terminalDisplayName }
+            if (matches.size == 1) {
+                val target = matches.first()
+                available.remove(target)
                 executors[snapshot.terminalTabId] = target.executor
             } else {
+                // No safe match (the snapshot's tab is gone, or its title is ambiguous). Open a
+                // fresh dedicated terminal and restore there instead of dropping the snapshot,
+                // preserving the original "exhausted -> new shell" behavior for the mixed case
+                // where unrelated terminals remain open but the saved tab is no longer present.
                 val workingDirectory = project.basePath ?: FileUtil.getTempDirectory()
                 val shellWidget = manager.createLocalShellWidget(workingDirectory, snapshot.terminalDisplayName)
                 executors[snapshot.terminalTabId] = { command ->
