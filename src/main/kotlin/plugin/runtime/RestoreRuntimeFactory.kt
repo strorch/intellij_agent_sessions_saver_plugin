@@ -60,15 +60,32 @@ data class RestoreRuntime(
     private val uuidPattern = Regex("(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
     private val ambiguityClassifier = StartupAmbiguityClassifier()
 
-    fun startupRestore(): RestoreDispatchSummary {
+    /**
+     * Loads and project-scopes the persisted snapshots. This performs the file IO portion of
+     * startup restore and is safe (and intended) to run off the EDT. Returns `null` when startup
+     * restore is disabled, in which case the empty summary has already been published.
+     */
+    fun loadStartupCandidates(): List<TerminalSessionSnapshot>? {
         if (!settingsService.isStartupRestoreEnabled()) {
             val emptySummary = RestoreDispatchSummary(0, 0, 0, 0, 0, 0)
             summaryNotifier.publish(emptyList(), emptySummary.toCounters())
-            return emptySummary
+            return null
         }
         val snapshots = snapshotStore.load(projectScopeId, currentSchemaVersion = 3)
-        val scoped = projectScopeGuard.filterByProject(snapshots, projectScopeId)
-        return dispatchRestore(scoped, timeoutSeconds = 30, useStartupChooser = true)
+        return projectScopeGuard.filterByProject(snapshots, projectScopeId)
+    }
+
+    /**
+     * Dispatches restore for pre-loaded candidates. Touches terminal widgets and may show the
+     * session chooser dialog, so it must run on the EDT.
+     */
+    fun dispatchStartupRestore(candidates: List<TerminalSessionSnapshot>): RestoreDispatchSummary {
+        return dispatchRestore(candidates, timeoutSeconds = 30, useStartupChooser = true)
+    }
+
+    fun startupRestore(): RestoreDispatchSummary {
+        val candidates = loadStartupCandidates() ?: return RestoreDispatchSummary(0, 0, 0, 0, 0, 0)
+        return dispatchStartupRestore(candidates)
     }
 
     fun manualRestore(): Int {
