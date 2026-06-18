@@ -1,6 +1,7 @@
 package plugin.persistence.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class TerminalSessionSnapshot(
@@ -15,6 +16,9 @@ data class TerminalSessionSnapshot(
     val sessionReferenceConfidence: String? = null,
     val sessionCandidates: List<String> = emptyList(),
     val processId: Long? = null,
+    // Privacy (FR-013): the full process command line may carry secrets (e.g. --api-key, tokens).
+    // Keep it available transiently during capture/resolution, but never persist it to disk.
+    @Transient
     val processCommand: String? = null,
     val hadActiveAgentSession: Boolean,
     val capturedAt: Long,
