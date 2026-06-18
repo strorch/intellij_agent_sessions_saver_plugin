@@ -1,0 +1,24 @@
+# Kotlin / Java / IntelliJ
+build/
+out/
+.gradle/
+.idea/
+.intellijPlatform/
+*.iml
+*.class
+*.jar
+# Keep the Gradle wrapper jar tracked so a fresh checkout can bootstrap Gradle.
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs and environment
+*.log
+.env*
+
+# Test and temp
+*.tmp
+*.swp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

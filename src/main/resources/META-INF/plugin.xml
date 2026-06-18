@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>plugin.agent.sessions.saver</id>
+    <name>Agent Sessions Saver</name>
+    <vendor email="team@example.com">Core Team</vendor>
+    <description>Saves and restores terminal agent sessions.</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
+
+    <idea-version since-build="243"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="plugin.settings.RestorePolicySettingsService"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="plugin.settings.RestorePolicyConfigurable"
+                id="plugin.settings.RestorePolicyConfigurable"
+                displayName="Agent Sessions Saver"/>
+        <postStartupActivity implementation="plugin.restore.StartupRestorePostStartupActivity"/>
+        <notificationGroup id="Agent Sessions Saver" displayType="BALLOON" isLogByDefault="true"/>
+        <projectListeners>
+            <listener class="plugin.capture.ProjectCloseSnapshotListener"
+                      topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        </projectListeners>
+    </extensions>
+
+    <actions>
+        <group id="plugin.restore.menu"
+               text="Agent Sessions Saver"
+               description="Capture and restore agent sessions">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="plugin.capture.manual"
+                    class="plugin.capture.CaptureCurrentSessionsIdeAction"
+                    text="Capture Agent Sessions Now"
+                    description="Capture currently opened terminal agent sessions"/>
+            <separator/>
+            <action id="plugin.restore.manual"
+                    class="plugin.restore.actions.ManualRestoreIdeAction"
+                    text="Restore Agent Sessions"
+                    description="Restore agent sessions for current project"/>
+            <action id="plugin.restore.retry.failed"
+                    class="plugin.restore.actions.RetryFailedTerminalIdeAction"
+                    text="Retry Failed Agent Session(s)"
+                    description="Retry restore for failed terminals"/>
+        </group>
+    </actions>
+</idea-plugin>
